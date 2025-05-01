@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha - Emely</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo do Jogo da Velha - Emely */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fff5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #4a4a4a;
+        }
+
+        .container {
+            max-width: 500px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #e75a7c;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #e75a7c;
+            font-weight: 300;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px auto;
+        }
+
+        .cell {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(231, 90, 124, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cell:hover {
+            background-color: #ffeef2;
+        }
+
+        .cell.x {
+            color: #e75a7c;
+        }
+
+        .cell.o {
+            color: #f08a9d;
+        }
+
+        .cell.win {
+            background-color: #ffd6e0;
+        }
+
+        button {
+            background-color: #e75a7c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        button:hover {
+            background-color: #d64d6e;
+        }
+
+        .mode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            accent-color: #e75a7c;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #e75a7c;
+        }
+
+        @media (max-width: 500px) {
+            .board {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Velha</h1>
+        <div class="status" id="status">Sua vez (X)</div>
+        
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="restart">Reiniciar Jogo</button>
+            <div class="mode">
+                <label for="ai-mode">Jogar contra IA:</label>
+                <input type="checkbox" id="ai-mode" checked>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Desenvolvido por Emely ♥</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Jogo da Velha - Desenvolvido por Emely
+
+        // Elementos do DOM
+        const statusElement = document.getElementById("status");
+        const cells = document.querySelectorAll(".cell");
+        const restartButton = document.getElementById("restart");
+        const aiModeCheckbox = document.getElementById("ai-mode");
+
+        // Variáveis do jogo
+        let gameActive = true;
+        let currentPlayer = "X";
+        let gameState = ["", "", "", "", "", "", "", "", ""];
+        let aiMode = true;
+
+        // Combinações de vitória
+        const winningCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // linhas
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // colunas
+            [0, 4, 8], [2, 4, 6]             // diagonais
+        ];
+
+        // Mensagens do jogo
+        function getStatusMessage() {
+            if (gameActive) {
+                return `Sua vez (${currentPlayer})`;
+            } else if (gameState.includes("")) {
+                return `Jogador ${currentPlayer === "X" ? "O" : "X"} venceu!`;
+            } else {
+                return "Jogo empatou!";
+            }
+        }
+
+        // Inicializa o jogo
+        function initGame() {
+            cells.forEach((cell) => {
+                cell.addEventListener("click", handleCellClick);
+            });
+
+            restartButton.addEventListener("click", restartGame);
+            aiModeCheckbox.addEventListener("change", () => {
+                aiMode = aiModeCheckbox.checked;
+                restartGame();
+            });
+
+            updateStatus();
+        }
+
+        // Atualiza a mensagem de status
+        function updateStatus() {
+            statusElement.textContent = getStatusMessage();
+        }
+
+        // Manipula o clique em uma célula
+        function handleCellClick(event) {
+            const cell = event.target;
+            const index = parseInt(cell.getAttribute("data-index"));
+
+            // Verifica se a célula já está preenchida ou o jogo acabou
+            if (gameState[index] !== "" || !gameActive) {
+                return;
+            }
+
+            // Atualiza o estado do jogo
+            gameState[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer.toLowerCase());
+
+            // Verifica se o jogo terminou
+            checkGameEnd();
+
+            // Se o jogo continuar e for a vez da IA
+            if (gameActive && currentPlayer === "O" && aiMode) {
+                setTimeout(makeAIMove, 500);
+            }
+        }
+
+        // Verifica se o jogo terminou (vitória ou empate)
+        function checkGameEnd() {
+            let gameWon = false;
+            let winLine = null;
+
+            // Verifica todas as combinações de vitória
+            for (let i = 0; i < winningCombinations.length; i++) {
+                const [a, b, c] = winningCombinations[i];
+
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                    gameWon = true;
+                    winLine = [a, b, c];
+                    break;
+                }
+            }
+
+            // Se alguém ganhou
+            if (gameWon) {
+                gameActive = false;
+                highlightWinCells(winLine);
+                updateStatus();
+                return;
+            }
+
+            // Verifica empate
+            if (!gameState.includes("")) {
+                gameActive = false;
+                updateStatus();
+                return;
+            }
+
+            // Troca o jogador
+            currentPlayer = currentPlayer === "X" ? "O" : "X";
+            updateStatus();
+        }
+
+        // Destaca as células da linha vencedora
+        function highlightWinCells(winLine) {
+            winLine.forEach((index) => {
+                cells[index].classList.add("win");
+            });
+        }
+
+        // Movimento da IA
+        function makeAIMove() {
+            if (!gameActive) return;
+
+            // Encontra o melhor movimento
+            const bestMove = findBestMove();
+
+            // Executa o movimento
+            gameState[bestMove] = currentPlayer;
+            cells[bestMove].textContent = currentPlayer;
+            cells[bestMove].classList.add(currentPlayer.toLowerCase());
+
+            // Verifica se o jogo terminou
+            checkGameEnd();
+        }
+
+        // Encontra o melhor movimento para a IA
+        function findBestMove() {
+            // Tenta vencer
+            for (let i = 0; i < winningCombinations.length; i++) {
+                const [a, b, c] = winningCombinations[i];
+
+                // Verifica se pode vencer na próxima jogada
+                if (gameState[a] === "O" && gameState[b] === "O" && gameState[c] === "") return c;
+                if (gameState[a] === "O" && gameState[c] === "O" && gameState[b] === "") return b;
+                if (gameState[b] === "O" && gameState[c] === "O" && gameState[a] === "") return a;
+            }
+
+            // Tenta bloquear o jogador
+            for (let i = 0; i < winningCombinations.length; i++) {
+                const [a, b, c] = winningCombinations[i];
+
+                // Verifica se precisa bloquear o jogador
+                if (gameState[a] === "X" && gameState[b] === "X" && gameState[c] === "") return c;
+                if (gameState[a] === "X" && gameState[c] === "X" && gameState[b] === "") return b;
+                if (gameState[b] === "X" && gameState[c] === "X" && gameState[a] === "") return a;
+            }
+
+            // Tenta o centro
+            if (gameState[4] === "") return 4;
+
+            // Tenta os cantos
+            const corners = [0, 2, 6, 8];
+            const availableCorners = corners.filter((corner) => gameState[corner] === "");
+            if (availableCorners.length > 0) {
+                return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+            }
+
+            // Tenta qualquer célula disponível
+            const availableMoves = gameState
+                .map((cell, index) => (cell === "" ? index : null))
+                .filter((index) => index !== null);
+            return availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        }
+
+        // Reinicia o jogo
+        function restartGame() {
+            gameActive = true;
+            currentPlayer = "X";
+            gameState = ["", "", "", "", "", "", "", "", ""];
+
+            cells.forEach((cell) => {
+                cell.textContent = "";
+                cell.classList.remove("x", "o", "win");
+            });
+
+            updateStatus();
+        }
+
+        // Inicia o jogo quando a página carrega
+        document.addEventListener("DOMContentLoaded", initGame);
+    </script>
+</body>
+</html>
+
