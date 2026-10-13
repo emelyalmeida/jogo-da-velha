@@ -1,34 +1,22 @@
-# Jogo da Velha 🌷
+# Jogo da Velha
 
-Uma versão do clássico jogo da velha feita com HTML, CSS e JavaScript. O projeto tem uma interface delicada em tons de rosa e permite jogar contra uma IA simples ou alternar para partidas entre pessoas.
+Um jogo da velha feito com HTML, CSS e JavaScript. Dá para jogar contra outra pessoa ou ativar o modo contra uma IA com uma estratégia simples.
 
-## ✨ Funcionalidades
-
-- Tabuleiro interativo 3 × 3
+## Funcionalidades
+- Tabuleiro 3 × 3
 - Verificação de vitória e empate
-- Destaque da combinação vencedora
+- Destaque das casas vencedoras
 - Botão para reiniciar a partida
-- Opção de jogar contra uma IA com estratégia simples
+- Modo contra a IA
 - Layout adaptável para telas menores
 
-## 🛠️ Tecnologias
+## Tecnologias
+HTML, CSS, JavaScript e Google Fonts.
 
-- HTML5
-- CSS3
-- JavaScript
-- Google Fonts (Poppins)
+## Como executar
+Clone o repositório e abra o arquivo `index.html` no navegador.
 
-## ▶️ Como executar
+## O que pratiquei
+Manipulação do DOM, eventos, arrays e condições para verificar o resultado da partida.
 
-1. Clone este repositório.
-2. Abra o arquivo `index.html` no navegador.
-
-Não é necessário instalar dependências.
-
-## 📚 O que pratiquei
-
-Manipulação do DOM, eventos, arrays para representar o tabuleiro, condições de vitória e organização da lógica de um jogo.
-
----
-
-Feito por [Emely Almeida](https://github.com/emelyalmeida) 💗
+Desenvolvido por [Emely Almeida](https://github.com/emelyalmeida).
